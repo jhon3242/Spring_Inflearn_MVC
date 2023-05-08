@@ -2,42 +2,37 @@ package hello.servlet.web.springmvc.v3;
 
 import hello.servlet.domain.member.Member;
 import hello.servlet.domain.member.MemberRepository;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/springmvc/v3/members")
 public class SpringMemberControllerV3 {
 	MemberRepository memberRepository = MemberRepository.getInstance();
 
-	@RequestMapping("/new-form")
-	public ModelAndView newForm() {
-		return new ModelAndView("new-form");
+	@GetMapping("/new-form")
+	public String newForm() {
+		return "new-form";
 
 	}
 
-	@RequestMapping("/save")
-	public ModelAndView save(HttpServletRequest req, HttpServletResponse resp) {
-		String username = req.getParameter("username");
-		int age = Integer.parseInt(req.getParameter("age"));
-
+	@PostMapping("/save")
+	public String save(
+			@RequestParam("username") String username,
+			@RequestParam("age") int age,
+			Model model
+		) {
 		Member member = new Member(username, age);
 		memberRepository.save(member);
 
-		ModelAndView mv = new ModelAndView("save-result");
-		mv.addObject("member", member);
-
-		return mv;
+		model.addAttribute("member", member);
+		return "save-result";
 	}
 
-	@RequestMapping
-	public ModelAndView members(HttpServletRequest req, HttpServletResponse resp) {
-		System.out.println("SpringMemberListControllerV1.process");
-		ModelAndView mv = new ModelAndView("members");
-		mv.addObject("members", memberRepository.findAll());
-		return mv;
+	@GetMapping
+	public String members(Model model) {
+		model.addAttribute("members", memberRepository.findAll());
+		return "members";
 	}
 }
